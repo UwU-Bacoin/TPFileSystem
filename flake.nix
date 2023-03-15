@@ -1,0 +1,22 @@
+{
+  description = "File system Managment";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    utils.url = "github:numtide/flake-utils";
+    utils.inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, utils } @inputs:
+    utils.lib.eachDefaultSystem (system:
+      with import nixpkgs { inherit system; }; {
+        devShells.default = mkShell {
+          venvDir = "venv";
+          buildInputs = [
+            gnumake
+            python310Full
+            python310Packages.venvShellHook
+          ];
+        };
+      });
+}
