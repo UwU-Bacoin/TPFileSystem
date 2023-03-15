@@ -1,0 +1,9 @@
+# Python bytcode
+__pycache__
+*.py[dcw]
+
+# "Disks"
+MY1stDISK
+
+# Python environment
+venv
