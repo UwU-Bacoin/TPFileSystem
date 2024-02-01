@@ -1,9 +1,12 @@
 from typing import Callable
+
+import builtins
 import random
 import string
 import timeit
 import typing
 
+import optimize
 import tp_sgf_new as disk
 from vendor import fs as base_fs
 
@@ -103,15 +106,13 @@ ACTIONS: set[tuple[UserMethod, int]] = {
 }
 
 
-DISK_SIZE = 1204
+DISK_SIZE = 1024
 
 
-def tester(cache_size: int):
+def tester(disk, cache_size: int):
     disk_name = f"experiment.disk.{_rand_ascii(8)}"
 
-    print("initializing disk...")
     disk.init(disk_name, DISK_SIZE, cache_size)
-
     possible_actions, weights = zip(*ACTIONS)
 
     random.seed(3301)
@@ -127,9 +128,17 @@ def tester(cache_size: int):
 def main():
     times = {}
 
+    disk.fs_log_on()
     disk.fs = base_fs
-    times["base fs - no cache"] = timeit.timeit(lambda: tester(1))
-    times["base fs"] = timeit.timeit(lambda: tester(32))
+
+    # times["base fs - no cache"] = timeit.timeit(lambda: tester(disk, 1))
+    # times["base fs"] = timeit.timeit(lambda: tester(disk, 32))
+
+    builtins.open = optimize.fake_open
+    optimize.hook_disk(disk)
+
+    times["base fs - no cache"] = timeit.timeit(lambda: tester(disk, 1), number=3)
+    times["base fs"] = timeit.timeit(lambda: tester(disk, 32), number=3)
 
     print('\n'.join(f"[{k}]: {v}" for k, v in times.items()))
 
