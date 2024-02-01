@@ -4,6 +4,7 @@ __pycache__
 
 # "Disks"
 MY1stDISK
+*.disk.*
 
 # Python environment
 venv
