@@ -1,6 +1,6 @@
+from functools import partial
 from typing import Callable
 
-import builtins
 import random
 import string
 import timeit
@@ -22,10 +22,16 @@ def _provide_uniq_id(func):
     return inner
 
 
+
+_name = ''.join(random.choice(string.ascii_letters) for _ in range(1024))
+
+
 @_provide_uniq_id
 def _rand_ascii(length: int, id_: int) -> str:
-    name = ''.join(random.choice(string.ascii_letters) for _ in range(length))
-    return f"{id_}__{name}"
+    global _name
+
+    _name += random.choice(string.ascii_letters)
+    return f"{id_}__{_name[id_:id_ + length]}"
 
 
 class User:
@@ -62,7 +68,7 @@ class User:
         if not random.randint(0, 10):
             return None
 
-        disk.write(filename, _rand_ascii(1000))
+        disk.write(filename, _rand_ascii(32))
 
     @classmethod
     def create_dir(cls) -> None:
@@ -130,18 +136,31 @@ def main():
 
     disk.fs_log_on()
     disk.fs = base_fs
+    test = partial(tester, disk, 1)
 
-    # times["base fs - no cache"] = timeit.timeit(lambda: tester(disk, 1))
+    # times["base fs - no cache"] = timeit.timeit(lambda: tester(disk, 1), number=1)
     # times["base fs"] = timeit.timeit(lambda: tester(disk, 32))
 
-    builtins.open = optimize.fake_open
     optimize.hook_disk(disk)
+    times["+ disk hook"] = timeit.timeit(test, number=1)
 
-    times["base fs - no cache"] = timeit.timeit(lambda: tester(disk, 1), number=3)
-    times["base fs"] = timeit.timeit(lambda: tester(disk, 32), number=3)
+    optimize.nuke_blockcache_system(disk)
+    times["+ nuked blocks"] = timeit.timeit(test, number=1)
+
+    optimize.override_copy(disk)
+    times["+ copy"] = timeit.timeit(test, number=1)
 
     print('\n'.join(f"[{k}]: {v}" for k, v in times.items()))
 
 
 if __name__ == "__main__":
-    main()
+    from cProfile import Profile
+    from pstats import SortKey, Stats
+
+    with Profile() as profile:
+        main()
+
+        (Stats(profile)
+            .strip_dirs()
+            .sort_stats(SortKey.CUMULATIVE)
+            .print_stats())
