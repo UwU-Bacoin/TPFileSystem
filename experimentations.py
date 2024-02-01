@@ -1,11 +1,11 @@
 import builtins
 import random
 from enum import IntEnum, auto
-from functools import wraps, partial
+from functools import wraps
 from string import ascii_letters
 from typing import Callable, TypeVar, List, Tuple
 
-import fs
+from vendor import fs
 import tp_sgf_new as disk
 
 disk.fs_log_on()

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fs import *
+from vendor.fs import *
 
 
 # TRAVAUX PRATIQUES INF2 : LE SYSTEME DE FICHIER
@@ -12,7 +12,7 @@ from fs import *
 # Pensez à regarder l'évolution du cache ...
 
 ############################################################
-# INIT 
+# INIT
 ############################################################
 # disk_size → taille du disque en secteurs
 # cache_size → taille du cache en blocs
