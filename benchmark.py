@@ -136,10 +136,12 @@ def main():
 
     disk.fs_log_on()
     disk.fs = base_fs
-    test = partial(tester, disk, 1)
 
-    # times["base fs - no cache"] = timeit.timeit(lambda: tester(disk, 1), number=1)
-    # times["base fs"] = timeit.timeit(lambda: tester(disk, 32))
+    test = partial(tester, disk, 1)
+    test_cached = partial(tester, disk, 1)
+
+    times["fs - no cache"] = timeit.timeit(test, number=1)
+    times["fs"] = timeit.timeit(test_cached, number=1)
 
     optimize.hook_disk(disk)
     times["+ disk hook"] = timeit.timeit(test, number=1)

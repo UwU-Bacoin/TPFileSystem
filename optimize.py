@@ -2,15 +2,13 @@ from __future__ import annotations
 import builtins
 
 
-def _skip(*_):
-    pass
-
-
 class FakeOpen:
     _open = builtins.open
     _lines = []
     _line_count = 0
     _content = None
+
+    _skip = lambda *_: None
 
     write = _skip
     close = _skip
